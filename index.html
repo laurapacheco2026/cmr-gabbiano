@@ -791,9 +791,14 @@ function getTransportistaTexto(inc) {
 function buildInstructions(map) {
   const inc = map.incoterm || 'EXW';
   const fac = map.doc_factura || '[nº factura]';
-  const entrega = [map.ent_almacen, map.ent_dir, map.ent_ciudad, map.ent_pais]
-    .filter(Boolean).join(', ') || '[dirección de entrega]';
-  return `Entregar en: ${entrega}\n${inc} · Incoterms 2020 · Nº factura ${fac}`;
+  const lines = [
+    map.carga_lugar ? 'Lugar de carga: ' + map.carga_lugar : '',
+    map.carga_fecha ? 'Fecha: ' + formatDateDisplay(map.carga_fecha) : '',
+    map.carga_hora  ? 'Hora: '  + map.carga_hora : '',
+    '',
+    `${inc} · Incoterms 2020 · Nº factura ${fac}`
+  ].filter((l, i, arr) => l !== '' || arr[i - 1] !== '');
+  return lines.join('\n');
 }
 
 function buildFiscalObs(inc) {
@@ -823,11 +828,9 @@ function syncCMR() {
 
   const map = {
     incoterm: inc,
-    carga_lugar: v('f_carga_lugar') || DEFAULTS.carga_lugar,
-    ent_almacen: v('f_ent_almacen'),
-    ent_dir: v('f_ent_dir'),
-    ent_ciudad: v('f_ent_ciudad'),
-    ent_pais: v('f_ent_pais'),
+    carga_lugar: v('f_carga_lugar'),
+    carga_fecha: v('f_carga_fecha'),
+    carga_hora:  v('f_carga_hora'),
     doc_factura: v('f_doc_factura')
   };
 
