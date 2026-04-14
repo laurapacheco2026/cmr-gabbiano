@@ -440,7 +440,6 @@ select.field-input {
   </div>
   <div class="topbar-actions">
     <button class="btn btn-secondary" onclick="clearForm()">↺ Limpiar</button>
-    <button class="btn btn-secondary" onclick="printCMR()">🖨 Imprimir</button>
     <button class="btn btn-primary" onclick="downloadPDF()">⬇ Descargar PDF</button>
   </div>
 </div>
@@ -964,11 +963,6 @@ function clearForm() {
   document.getElementById('f_embalaje').value = '';
   syncCMR();
   showToast('Formulario limpiado', 'ok');
-}
-
-// ===== PRINT =====
-function printCMR() {
-  window.print();
 }
 
 // ===== PDF =====
