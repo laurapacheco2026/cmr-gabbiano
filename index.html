@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMR — Carta de Porte Internacional · Gabbiano Iberia</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+:root {
+  --ink: #1a1a1a;
+  --ink-mid: #444;
+  --ink-light: #888;
+  --blue-header: #d0e4f7;
+  --blue-accent: #1a5fa8;
+  --highlight-bg: #e8f0fb;
+  --cream: #fdf8ef;
+  --border: #bbb;
+  --border-strong: #444;
+  --white: #fff;
+  --grey-zone: #f0f0f0;
+  --yellow-input: #fffde8;
+  --red: #c0392b;
+  --green: #27ae60;
+
+  --font-main: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-main);
+  background: #e8ecf0;
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  background: var(--blue-accent);
+  color: #fff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.topbar-brand {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+.topbar-brand span {
+  font-weight: 300;
+  opacity: 0.8;
+  margin-left: 6px;
+}
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-primary {
+  background: #fff;
+  color: var(--blue-accent);
+}
+.btn-primary:hover { background: #e8f0fb; }
+.btn-secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.25); }
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+  border: 1px solid #a93226;
+}
+.btn-danger:hover { background: #a93226; }
+
+/* ===== LAYOUT ===== */
+.app-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 52px);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  background: #fff;
+  border-right: 1px solid #d0d5dd;
+  overflow-y: auto;
+  padding: 20px 16px 40px;
+}
+.sidebar-section {
+  margin-bottom: 22px;
+}
+.sidebar-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--blue-accent);
+  padding: 0 4px 8px;
+  border-bottom: 2px solid var(--blue-accent);
+  margin-bottom: 12px;
+}
+
+.field-group {
+  margin-bottom: 10px;
+}
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  margin-bottom: 3px;
+  letter-spacing: 0.01em;
+}
+.field-label .badge {
+  display: inline-block;
+  background: var(--blue-accent);
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 5px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.field-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--yellow-input);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--blue-accent);
+  box-shadow: 0 0 0 3px rgba(26,95,168,0.12);
+}
+.field-input[readonly] {
+  background: var(--grey-zone);
+  color: var(--ink-mid);
+  cursor: not-allowed;
+}
+.field-input.auto {
+  background: #edf6ff;
+  color: var(--blue-accent);
+  font-style: italic;
+}
+select.field-input {
+  cursor: pointer;
+}
+
+/* ===== CMR PREVIEW ===== */
+.cmr-preview-area {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cmr-preview-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-light);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+/* ===== CMR DOCUMENT ===== */
+#cmr-doc {
+  background: #fff;
+  width: 780px;
+  min-width: 780px;
+  border: 2px solid var(--border-strong);
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.cmr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.cmr-table td, .cmr-table th {
+  border: 1px solid var(--border-strong);
+  padding: 0;
+  vertical-align: top;
+}
+
+/* Header */
+.cmr-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  border-bottom: 2px solid var(--border-strong);
+}
+.cmr-header-main {
+  padding: 5px 8px;
+  border-right: 1px solid var(--border-strong);
+}
+.cmr-header-title {
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.3;
+}
+.cmr-header-sub {
+  font-size: 7px;
+  text-align: center;
+  color: #444;
+  margin-top: 2px;
+}
+.cmr-header-badge {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+.cmr-conv-note {
+  font-size: 6.5px;
+  text-align: center;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--border-strong);
+  background: #fafafa;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Generic cell styles */
+.cell-label {
+  font-size: 7px;
+  font-weight: bold;
+  padding: 2px 4px 1px;
+  background: var(--blue-header);
+  border-bottom: 1px solid var(--border);
+  line-height: 1.3;
+}
+.cell-value {
+  font-size: 8.5px;
+  padding: 3px 5px;
+  min-height: 22px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.35;
+}
+.cell-value.large {
+  min-height: 52px;
+}
+.cell-value.xlarge {
+  min-height: 64px;
+}
+.cell-value.signature {
+  min-height: 55px;
+  color: #777;
+  font-size: 7.5px;
+  font-style: italic;
+}
+
+/* highlighted cells */
+.cell-highlight .cell-label {
+  background: #b7d7f0;
+}
+.cell-highlight .cell-value {
+  background: #eeeeee;
+}
+
+/* Row structure */
+.cmr-row {
+  display: grid;
+  border-bottom: 1px solid var(--border-strong);
+}
+.cmr-row:last-child { border-bottom: none; }
+
+.cmr-cell {
+  border-right: 1px solid var(--border-strong);
+  overflow: hidden;
+}
+.cmr-cell:last-child { border-right: none; }
+
+/* specific grids */
+.row-1-2   { grid-template-columns: 1fr 1fr; }
+.row-3-4   { grid-template-columns: 1fr 1fr; }
+.row-5     { grid-template-columns: 1fr; }
+.row-6789  { grid-template-columns: 1fr 1fr 1.4fr 1.2fr; }
+.row-1011-13 { grid-template-columns: 1fr 1fr 2.2fr; }
+.row-16-17 { grid-template-columns: 1fr 1fr; }
+.row-22-23-24 { grid-template-columns: 1fr 1fr 1fr; }
+.row-19-20-21 { grid-template-columns: 1fr 1.4fr 1.2fr; }
+.row-18res { grid-template-columns: 1fr 1fr; }
+.row-footer { grid-template-columns: 1fr; }
+
+.cmr-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ADR footer */
+.cmr-adr {
+  padding: 4px 6px;
+  font-size: 6.5px;
+  color: #444;
+  background: #fdf8ef;
+  border-top: 1px solid var(--border-strong);
+  line-height: 1.5;
+}
+.cmr-foot {
+  padding: 3px 6px;
+  font-size: 7px;
+  text-align: center;
+  color: #666;
+  background: #fdf8ef;
+  border-top: 1px solid var(--border);
+}
+
+/* status strip */
+.cmr-incoterm-strip {
+  background: var(--blue-accent);
+  color: #fff;
+  font-size: 8px;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px;
+  letter-spacing: 0.05em;
+}
+
+/* ===== PRINT / PDF ===== */
+@media print {
+  body { background: #fff; }
+  .topbar, .sidebar, .cmr-preview-label { display: none !important; }
+  .app-layout { display: block; }
+  .cmr-preview-area { padding: 0; }
+  #cmr-doc {
+    width: 100%;
+    min-width: unset;
+    box-shadow: none;
+    border: 1.5px solid #000;
+    font-size: 7.5px;
+  }
+  .btn { display: none !important; }
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s;
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast.ok { background: var(--green); }
+.toast.err { background: var(--red); }
+
+/* loading overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  color: #fff;
+  font-size: 15px;
+}
+.overlay.active { display: flex; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive sidebar scroll */
+@media (max-width: 1100px) {
+  .app-layout { grid-template-columns: 300px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    Gabbiano Iberia SLU <span>· Generador CMR</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-secondary" onclick="clearForm()">↺ Limpiar</button>
+    <button class="btn btn-secondary" onclick="printCMR()">🖨 Imprimir</button>
+    <button class="btn btn-primary" onclick="downloadPDF()">⬇ Descargar PDF</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- OPERACIÓN -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operación</div>
+
+      <div class="field-group">
+        <label class="field-label">Incoterm</label>
+        <select class="field-input" id="f_incoterm" onchange="syncCMR()">
+          <option>EXW</option><option>FCA</option><option>CPT</option>
+          <option>CIP</option><option>DAP</option><option>DPU</option>
+          <option>DDP</option><option>FAS</option><option>FOB</option>
+          <option>CFR</option><option>CIF</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Transportista <span class="badge">Auto</span></label>
+        <input class="field-input auto" id="f_transportista_auto" readonly>
+      </div>
+    </div>
+
+    <!-- REMITENTE (fijo) -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">1 · Remitente (fijo)</div>
+      <div class="field-group"><label class="field-label">Empresa</label>
+        <input class="field-input" id="f_rem_nombre" readonly value="Gabbiano Iberia SLU"></div>
+      <div class="field-group"><label class="field-label">Dirección</label>
+        <input class="field-input" id="f_rem_dir" readonly value="Ctra. Matadepera 204. Local 1 - 08226"></div>
+      <div class="field-group"><label class="field-label">Ciudad</label>
+        <input class="field-input" id="f_rem_ciudad" readonly value="Barcelona"></div>
+      <div class="field-group"><label class="field-label">País</label>
+        <input class="field-input" id="f_rem_pais" readonly value="España"></div>
+      <div class="field-group"><label class="field-label">NIF / VAT</label>
+        <input class="field-input" id="f_rem_nif" readonly value="B59432021"></div>
+    </div>
+
+    <!-- DESTINATARIO FISCAL -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">2 · Destinatario fiscal</div>
+      <div class="field-group"><label class="field-label">Empresa compradora</label>
+        <input class="field-input" id="f_dest_nombre" oninput="syncCMR()" placeholder="Nombre empresa"></div>
+      <div class="field-group"><label class="field-label">Dirección fiscal</label>
+        <input class="field-input" id="f_dest_dir" oninput="syncCMR()" placeholder="Dirección"></div>
+      <div class="field-group"><label class="field-label">Ciudad fiscal</label>
+        <input class="field-input" id="f_dest_ciudad" oninput="syncCMR()" placeholder="Ciudad"></div>
+      <div class="field-group"><label class="field-label">País fiscal</label>
+        <input class="field-input" id="f_dest_pais" oninput="syncCMR()" placeholder="País"></div>
+      <div class="field-group"><label class="field-label">NIF-IVA comprador</label>
+        <input class="field-input" id="f_dest_nif" oninput="syncCMR()" placeholder="FR..."></div>
+    </div>
+
+    <!-- ENTREGA FÍSICA -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">3 · Entrega física</div>
+      <div class="field-group"><label class="field-label">Almacén destino</label>
+        <input class="field-input" id="f_ent_almacen" oninput="syncCMR()" placeholder="Nombre almacén"></div>
+      <div class="field-group"><label class="field-label">Dirección entrega</label>
+        <input class="field-input" id="f_ent_dir" oninput="syncCMR()" placeholder="Dirección"></div>
+      <div class="field-group"><label class="field-label">Ciudad entrega</label>
+        <input class="field-input" id="f_ent_ciudad" oninput="syncCMR()" placeholder="Ciudad"></div>
+      <div class="field-group"><label class="field-label">País entrega</label>
+        <input class="field-input" id="f_ent_pais" oninput="syncCMR()" placeholder="País"></div>
+    </div>
+
+    <!-- CARGA -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">4 · Carga</div>
+      <div class="field-group"><label class="field-label">Lugar de carga</label>
+        <input class="field-input" id="f_carga_lugar" oninput="syncCMR()" placeholder="Ctra. Matadepera 204..."></div>
+      <div class="field-group"><label class="field-label">Fecha de carga</label>
+        <input class="field-input" type="date" id="f_carga_fecha" oninput="syncCMR()"></div>
+      <div class="field-group"><label class="field-label">Hora de carga</label>
+        <input class="field-input" id="f_carga_hora" oninput="syncCMR()" placeholder="08:00"></div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">5 · Documentos</div>
+      <div class="field-group"><label class="field-label">Nº Factura</label>
+        <input class="field-input" id="f_doc_factura" oninput="syncCMR()" placeholder="FAC-2025-001"></div>
+      <div class="field-group"><label class="field-label">Albarán</label>
+        <input class="field-input" id="f_doc_albaran" oninput="syncCMR()" placeholder="ALB-001"></div>
+      <div class="field-group"><label class="field-label">Packing list</label>
+        <input class="field-input" id="f_doc_packing" oninput="syncCMR()" placeholder="PL-001"></div>
+    </div>
+
+    <!-- MERCANCÍA -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Mercancía</div>
+      <div class="field-group"><label class="field-label">Nº de bultos <span class="badge">6</span></label>
+        <input class="field-input" id="f_bultos" oninput="syncCMR()" placeholder="0" type="number" min="0"></div>
+      <div class="field-group"><label class="field-label">Tipo de embalaje <span class="badge">7</span></label>
+        <select class="field-input" id="f_embalaje" onchange="syncCMR()">
+          <option value="">— Seleccionar —</option>
+          <option>Palet</option><option>Caja</option><option>Bidón</option>
+          <option>Saco</option><option>Bulto</option><option>Contenedor</option><option>Mixto</option>
+        </select>
+      </div>
+      <div class="field-group"><label class="field-label">Ref. factura / mercancía <span class="badge">8</span></label>
+        <input class="field-input" id="f_merc_ref" oninput="syncCMR()" placeholder="Referencia de factura"></div>
+      <div class="field-group"><label class="field-label">Código HS <span class="badge">9</span></label>
+        <input class="field-input" id="f_hs" oninput="syncCMR()" placeholder="0000.00"></div>
+      <div class="field-group"><label class="field-label">Peso bruto (kg) <span class="badge">10</span></label>
+        <input class="field-input" id="f_peso" oninput="syncCMR()" placeholder="0.00" type="number" min="0" step="0.01"></div>
+      <div class="field-group"><label class="field-label">Volumen (m³) <span class="badge">11</span></label>
+        <input class="field-input" id="f_volumen" oninput="syncCMR()" placeholder="0.00" type="number" min="0" step="0.01"></div>
+    </div>
+
+    <!-- TRANSPORTISTA -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">16 · Transportista principal</div>
+      <div class="field-group"><label class="field-label">Empresa transportista</label>
+        <input class="field-input" id="f_trans_nombre" oninput="syncCMR()" placeholder="Nombre transportista"></div>
+      <div class="field-group"><label class="field-label">Dirección</label>
+        <input class="field-input" id="f_trans_dir" oninput="syncCMR()" placeholder="Dirección"></div>
+      <div class="field-group"><label class="field-label">País</label>
+        <input class="field-input" id="f_trans_pais" oninput="syncCMR()" placeholder="País"></div>
+      <div class="field-group"><label class="field-label">Matrícula camión</label>
+        <input class="field-input" id="f_trans_cam" oninput="syncCMR()" placeholder="0000-AAA"></div>
+      <div class="field-group"><label class="field-label">Matrícula tráiler</label>
+        <input class="field-input" id="f_trans_trailer" oninput="syncCMR()" placeholder="R-0000-AAA"></div>
+    </div>
+
+    <!-- TRANSPORTISTAS SUCESIVOS -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">17 · Transportistas sucesivos</div>
+      <div class="field-group">
+        <input class="field-input" id="f_sucesivos" oninput="syncCMR()" placeholder="Opcional — datos sucesivos">
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- CMR PREVIEW -->
+  <main class="cmr-preview-area">
+    <div class="cmr-preview-label">Vista previa del CMR — se actualiza en tiempo real</div>
+
+    <!-- THE DOCUMENT -->
+    <div id="cmr-doc">
+
+      <!-- INCOTERM STRIP -->
+      <div class="cmr-incoterm-strip" id="cmr_strip">
+        EXW · Por cuenta comprador · Gabbiano Iberia SLU
+      </div>
+
+      <!-- HEADER -->
+      <div class="cmr-header">
+        <div class="cmr-header-main">
+          <div class="cmr-header-title">
+            CARTA DE PORTE INTERNACIONAL<br>
+            CMR INTERNATIONAL CONSIGNMENT NOTE
+          </div>
+          <div class="cmr-header-sub">
+            A cumplimentar bajo la responsabilidad del remitente · To be completed on the sender's responsibility<br>
+            Las copias de este ejemplar son igualmente auténticas · The copies of this consignment note are equally authentic
+          </div>
+        </div>
+        <div class="cmr-header-badge">CMR</div>
+      </div>
+      <div class="cmr-conv-note">
+        Este transporte está sujeto, pese a cualquier cláusula en contrario, al Convenio relativo al contrato de transporte internacional de mercancías por carretera (CMR) ·
+        This carriage is subject, notwithstanding any clause to the contrary, to the Convention on the Contract for the international Carriage of Goods by Road (CMR)
+      </div>
+
+      <!-- BODY -->
+      <div class="cmr-body">
+
+        <!-- ROW 1+2 -->
+        <div class="cmr-row row-1-2">
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">1  Remitente (nombre, dirección, país) · Sender (name, address, country)</div>
+            <div class="cell-value xlarge" id="cmr_remitente">Gabbiano Iberia SLU
+Ctra. Matadepera 204. Local 1 - 08226
+Barcelona
+España
+B59432021</div>
+          </div>
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">2  Destinatario (nombre, dirección, país) · Consignee (name, address, country)</div>
+            <div class="cell-value xlarge" id="cmr_destinatario"></div>
+          </div>
+        </div>
+
+        <!-- ROW 3+4 -->
+        <div class="cmr-row row-3-4">
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">3  Entrega de la mercancía · Delivery of the goods</div>
+            <div class="cell-value large" id="cmr_entrega"></div>
+          </div>
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">4  Recogida de la mercancía · Taking over the goods</div>
+            <div class="cell-value large" id="cmr_carga"></div>
+          </div>
+        </div>
+
+        <!-- ROW 5 -->
+        <div class="cmr-row row-5">
+          <div class="cmr-cell">
+            <div class="cell-label">5  Documentos entregados al transportista por el remitente · Documents handed to the carrier by the sender</div>
+            <div class="cell-value" id="cmr_docs" style="min-height:32px"></div>
+          </div>
+        </div>
+
+        <!-- ROW 6/7/8/9 -->
+        <div class="cmr-row row-6789">
+          <div class="cmr-cell">
+            <div class="cell-label">6  Número de bultos<br>Number of packages</div>
+            <div class="cell-value large" id="cmr_bultos" style="font-size:14px;font-weight:bold;text-align:center;padding-top:12px"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label">7  Tipo de embalaje<br>Method of packing</div>
+            <div class="cell-value large" id="cmr_embalaje" style="font-size:10px;font-weight:bold;text-align:center;padding-top:12px"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label">8  Naturaleza de la mercancía<br>Nature of the goods</div>
+            <div class="cell-value large" id="cmr_mercancia">Mercancía según factura:</div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label">9  Código aduanero / HS Code<br>Useful references</div>
+            <div class="cell-value large" id="cmr_referencias"></div>
+          </div>
+        </div>
+
+        <!-- ROW 10/11/13 -->
+        <div class="cmr-row row-1011-13">
+          <div class="cmr-cell">
+            <div class="cell-label">10  Peso bruto, kg<br>Gross weight in kg</div>
+            <div class="cell-value large" id="cmr_peso" style="font-size:13px;font-weight:bold;text-align:center;padding-top:10px"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label">11  Volumen m³<br>Volume in m3</div>
+            <div class="cell-value large" id="cmr_volumen" style="font-size:13px;font-weight:bold;text-align:center;padding-top:10px"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label">13  Instrucciones del remitente · Sender's instructions</div>
+            <div class="cell-value large" id="cmr_instrucciones"></div>
+          </div>
+        </div>
+
+        <!-- ROW 16/17 -->
+        <div class="cmr-row row-16-17">
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">16  Transportista (nombre, dirección, país, otras referencias)<br>Carrier (name, address, country, other references)</div>
+            <div class="cell-value large" id="cmr_transportista"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label">17  Transportistas sucesivos · Successive carriers</div>
+            <div class="cell-value large" id="cmr_sucesivos">—</div>
+          </div>
+        </div>
+
+        <!-- ROW 22/23/24 -->
+        <div class="cmr-row row-22-23-24">
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">22  Firma o sello del remitente<br>Signature or stamp of the sender</div>
+            <div class="cell-value signature">Firmar al preparar la mercancía.<br>Acredita puesta a disposición.</div>
+          </div>
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">23  Firma o sello del transportista<br>Signature or stamp of the carrier</div>
+            <div class="cell-value signature">Firmar al recoger la mercancía.<br>Prueba de salida / recogida.</div>
+          </div>
+          <div class="cmr-cell cell-highlight">
+            <div class="cell-label">24  Firma y sello del destinatario<br>Signature and stamp of the consignee</div>
+            <div class="cell-value signature">Firmar al recibir.<br>Pide tu copia firmada.</div>
+          </div>
+        </div>
+
+        <!-- ROW 19/20/21 -->
+        <div class="cmr-row row-19-20-21" style="background:#fafafa">
+          <div class="cmr-cell">
+            <div class="cell-label" style="background:#e8e8e8">19  Reembolso · Cash on delivery</div>
+            <div class="cell-value" style="min-height:36px">—</div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label" style="background:#e8e8e8">20  A pagar por · To be paid by<br>Remitente / Destinatario</div>
+            <div class="cell-value" id="cmr_apagar" style="min-height:36px"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label" style="background:#e8e8e8">21  Extendido en · Established in · el / on</div>
+            <div class="cell-value" id="cmr_fecha_emision" style="min-height:36px"></div>
+          </div>
+        </div>
+
+        <!-- ROW 18 + reservas -->
+        <div class="cmr-row row-18res" style="background:#fafafa">
+          <div class="cmr-cell">
+            <div class="cell-label" style="background:#e8e8e8">18  Reservas y observaciones del transportista<br>Carrier reservations and observations</div>
+            <div class="cell-value" style="min-height:34px"></div>
+          </div>
+          <div class="cmr-cell">
+            <div class="cell-label" style="background:#e8e8e8">Parte no contractual reservada al transportista<br>Non-contractual part reserved for the carrier</div>
+            <div class="cell-value" id="cmr_obs_fiscal" style="min-height:34px;font-size:7.5px;color:#444"></div>
+          </div>
+        </div>
+
+        <!-- ADR -->
+        <div class="cmr-adr">
+          - En caso de mercancías peligrosas, indicar el número ONU, la clase ADR, el grupo de embalaje y las referencias útiles.<br>
+          - In case of dangerous goods, indicate the UN number, ADR class, packing group and useful references.
+        </div>
+
+        <!-- FOOT -->
+        <div class="cmr-foot">
+          Modelo inspirado en el modelo IRU 2007 · Uso interno automatizado · Gabbiano Iberia SLU · B59432021<br>
+          Conservar este CMR firmado junto con la factura y la documentación de transporte
+        </div>
+
+      </div><!-- end cmr-body -->
+    </div><!-- end cmr-doc -->
+
+  </main>
+</div><!-- end app-layout -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div>Generando PDF...</div>
+</div>
+
+<script>
+// ===== DEFAULTS =====
+const DEFAULTS = {
+  rem_nombre:  'Gabbiano Iberia SLU',
+  rem_dir:     'Ctra. Matadepera 204. Local 1 - 08226',
+  rem_ciudad:  'Barcelona',
+  rem_pais:    'España',
+  rem_nif:     'B59432021',
+  carga_lugar: 'Ctra. Matadepera 204. Local 1 - 08226, Barcelona, España'
+};
+
+// ===== INCOTERM LOGIC =====
+function getTransportistaTexto(inc) {
+  if (['EXW','FCA'].includes(inc)) return 'Por cuenta comprador';
+  if (['FAS','FOB'].includes(inc)) return 'Según operación marítima';
+  return 'Según operación';
+}
+
+function buildInstructions(map) {
+  const inc = map.incoterm || 'EXW';
+  const lugar = map.carga_lugar || '[lugar de carga]';
+  const ent = [map.ent_ciudad, map.ent_pais].filter(Boolean).join(' · ') || '[destino]';
+  const fac = map.doc_factura || '[nº factura]';
+  const t = {
+    EXW: `EXW ${lugar} · Incoterms 2020 · Nº factura ${fac}`,
+    FCA: `FCA ${lugar} · Incoterms 2020 · Nº factura ${fac}`,
+    CPT: `CPT ${ent} · Incoterms 2020 · Nº factura ${fac}`,
+    CIP: `CIP ${ent} · Incoterms 2020 · Nº factura ${fac}`,
+    DAP: `DAP ${ent} · Incoterms 2020 · Nº factura ${fac}`,
+    DPU: `DPU ${ent} · Incoterms 2020 · Nº factura ${fac}`,
+    DDP: `DDP ${ent} · Incoterms 2020 · Nº factura ${fac}`,
+    FAS: `FAS puerto convenido · Incoterms 2020 · Nº factura ${fac}`,
+    FOB: `FOB puerto convenido · Incoterms 2020 · Nº factura ${fac}`,
+    CFR: `CFR puerto destino · Incoterms 2020 · Nº factura ${fac}`,
+    CIF: `CIF puerto destino · Incoterms 2020 · Nº factura ${fac}`
+  };
+  return t[inc] || `Incoterms 2020 · Nº factura ${fac}`;
+}
+
+function buildFiscalObs(inc) {
+  if (inc === 'EXW') return 'Solicitar activamente CMR firmado en casillas 23 y 24.\nConservar junto con factura EXW.';
+  return 'Conservar CMR firmado, factura y prueba de transporte / entrega.';
+}
+
+function formatDateDisplay(d) {
+  if (!d) return '';
+  const [y,m,dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function setText(id, txt) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = txt;
+}
+
+// ===== MAIN SYNC =====
+function syncCMR() {
+  const inc = v('f_incoterm') || 'EXW';
+  const transAuto = getTransportistaTexto(inc);
+
+  // Update auto field
+  document.getElementById('f_transportista_auto').value = transAuto;
+
+  const map = {
+    incoterm: inc,
+    carga_lugar: v('f_carga_lugar') || DEFAULTS.carga_lugar,
+    ent_ciudad: v('f_ent_ciudad'),
+    ent_pais: v('f_ent_pais'),
+    doc_factura: v('f_doc_factura')
+  };
+
+  // Strip
+  document.getElementById('cmr_strip').textContent =
+    `${inc} · ${transAuto} · Gabbiano Iberia SLU`;
+
+  // 1 Remitente
+  const remitente = [
+    DEFAULTS.rem_nombre,
+    DEFAULTS.rem_dir,
+    DEFAULTS.rem_ciudad,
+    DEFAULTS.rem_pais,
+    'NIF/VAT: ' + DEFAULTS.rem_nif
+  ].join('\n');
+  setText('cmr_remitente', remitente);
+
+  // 2 Destinatario
+  const dest = [
+    v('f_dest_nombre'),
+    v('f_dest_dir'),
+    v('f_dest_ciudad'),
+    v('f_dest_pais'),
+    v('f_dest_nif') ? 'NIF-IVA: ' + v('f_dest_nif') : ''
+  ].filter(Boolean).join('\n');
+  setText('cmr_destinatario', dest);
+
+  // 3 Entrega
+  const entrega = [
+    v('f_ent_almacen'),
+    v('f_ent_dir'),
+    v('f_ent_ciudad'),
+    v('f_ent_pais')
+  ].filter(Boolean).join('\n');
+  setText('cmr_entrega', entrega);
+
+  // 4 Carga
+  const carga = [
+    v('f_carga_lugar') || DEFAULTS.carga_lugar,
+    v('f_carga_fecha') ? 'Fecha: ' + formatDateDisplay(v('f_carga_fecha')) : '',
+    v('f_carga_hora') ? 'Hora: ' + v('f_carga_hora') : ''
+  ].filter(Boolean).join('\n');
+  setText('cmr_carga', carga);
+
+  // 5 Documentos
+  const docs = [
+    v('f_doc_factura') ? 'Factura / Invoice: ' + v('f_doc_factura') : '',
+    v('f_doc_albaran') ? 'Albarán / Delivery note: ' + v('f_doc_albaran') : '',
+    v('f_doc_packing') ? 'Packing list: ' + v('f_doc_packing') : ''
+  ].filter(Boolean).join('\n');
+  setText('cmr_docs', docs);
+
+  // 6 Bultos
+  setText('cmr_bultos', v('f_bultos'));
+
+  // 7 Embalaje
+  setText('cmr_embalaje', v('f_embalaje'));
+
+  // 8 Mercancía
+  const merc = ['Mercancía según factura:', v('f_merc_ref') ? 'Ref. factura: ' + v('f_merc_ref') : '']
+    .filter(Boolean).join('\n');
+  setText('cmr_mercancia', merc);
+
+  // 9 Referencias / HS
+  const refs = [
+    v('f_doc_factura') ? 'Factura: ' + v('f_doc_factura') : '',
+    v('f_hs') ? 'HS: ' + v('f_hs') : ''
+  ].filter(Boolean).join('\n');
+  setText('cmr_referencias', refs);
+
+  // 10 Peso
+  setText('cmr_peso', v('f_peso') ? v('f_peso') + ' kg' : '');
+
+  // 11 Volumen
+  setText('cmr_volumen', v('f_volumen') ? v('f_volumen') + ' m³' : '');
+
+  // 13 Instrucciones
+  setText('cmr_instrucciones', buildInstructions(map));
+
+  // 16 Transportista
+  const trans = [
+    v('f_trans_nombre'),
+    [v('f_trans_dir'), v('f_trans_pais')].filter(Boolean).join(' / '),
+    v('f_trans_cam') ? 'Camión: ' + v('f_trans_cam') : '',
+    v('f_trans_trailer') ? 'Tráiler: ' + v('f_trans_trailer') : '',
+    transAuto
+  ].filter(Boolean).join('\n');
+  setText('cmr_transportista', trans);
+
+  // 17 Sucesivos
+  setText('cmr_sucesivos', v('f_sucesivos') || '—');
+
+  // 20 A pagar
+  const apagar = ['EXW','FCA'].includes(inc)
+    ? 'Destinatario\nConsignee'
+    : 'Según Incoterm ' + inc;
+  setText('cmr_apagar', apagar);
+
+  // 21 Fecha emisión
+  const hoy = new Date();
+  const fechaHoy = `${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`;
+  setText('cmr_fecha_emision', 'Barcelona, España\n' + fechaHoy);
+
+  // Obs fiscal
+  setText('cmr_obs_fiscal', buildFiscalObs(inc) + '\nTransportista: ' + transAuto);
+}
+
+// ===== CLEAR =====
+function clearForm() {
+  if (!confirm('¿Limpiar todos los campos del formulario?')) return;
+  const ids = [
+    'f_dest_nombre','f_dest_dir','f_dest_ciudad','f_dest_pais','f_dest_nif',
+    'f_ent_almacen','f_ent_dir','f_ent_ciudad','f_ent_pais',
+    'f_carga_lugar','f_carga_fecha','f_carga_hora',
+    'f_doc_factura','f_doc_albaran','f_doc_packing',
+    'f_bultos','f_merc_ref','f_hs','f_peso','f_volumen',
+    'f_trans_nombre','f_trans_dir','f_trans_pais','f_trans_cam','f_trans_trailer',
+    'f_sucesivos'
+  ];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('f_incoterm').value = 'EXW';
+  document.getElementById('f_embalaje').value = '';
+  syncCMR();
+  showToast('Formulario limpiado', 'ok');
+}
+
+// ===== PRINT =====
+function printCMR() {
+  window.print();
+}
+
+// ===== PDF =====
+function buildPdfFilename() {
+  const inc = v('f_incoterm') || 'EXW';
+  const fecha = v('f_carga_fecha')
+    ? formatDateDisplay(v('f_carga_fecha')).replace(/\//g,'-')
+    : (() => { const d=new Date(); return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`; })();
+  const cliente = safe(v('f_dest_nombre') || 'cliente');
+  const destino = safe(v('f_ent_ciudad') || v('f_ent_pais') || 'destino');
+  return `CMR_${inc}_${fecha}_${cliente}_${destino}`;
+}
+
+function safe(txt) {
+  return txt.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^\w\-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);
+}
+
+async function downloadPDF() {
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('active');
+  try {
+    const el = document.getElementById('cmr-doc');
+    const canvas = await html2canvas(el, {
+      scale: 2.5,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff'
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pW = pdf.internal.pageSize.getWidth();
+    const pH = pdf.internal.pageSize.getHeight();
+    const margin = 6;
+    const maxW = pW - margin * 2;
+    const imgRatio = canvas.height / canvas.width;
+    let imgW = maxW;
+    let imgH = imgW * imgRatio;
+
+    if (imgH > pH - margin * 2) {
+      imgH = pH - margin * 2;
+      imgW = imgH / imgRatio;
+    }
+
+    const x = (pW - imgW) / 2;
+    const y = margin;
+
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', x, y, imgW, imgH);
+    pdf.save(buildPdfFilename() + '.pdf');
+
+    showToast('PDF descargado correctamente ✓', 'ok');
+  } catch(e) {
+    console.error(e);
+    showToast('Error al generar PDF', 'err');
+  } finally {
+    overlay.classList.remove('active');
+  }
+}
+
+// ===== TOAST =====
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today as default date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f_carga_fecha').value = today;
+  syncCMR();
+});
+</script>
+</body>
+</html>
