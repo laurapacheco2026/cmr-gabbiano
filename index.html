@@ -359,16 +359,21 @@ select.field-input {
 
 /* ===== PRINT / PDF ===== */
 @media print {
-  body { background: #fff; }
+  @page { size: A4 portrait; margin: 8mm; }
+  body { background: #fff; margin: 0; padding: 0; }
   .topbar, .sidebar, .cmr-preview-label { display: none !important; }
-  .app-layout { display: block; }
-  .cmr-preview-area { padding: 0; }
+  .app-layout { display: block !important; }
+  .cmr-preview-area {
+    padding: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
   #cmr-doc {
-    width: 100%;
-    min-width: unset;
-    box-shadow: none;
-    border: 1.5px solid #000;
-    font-size: 7.5px;
+    width: 100% !important;
+    min-width: unset !important;
+    box-shadow: none !important;
+    border: 1.5px solid #000 !important;
+    page-break-inside: avoid;
   }
   .btn { display: none !important; }
 }
@@ -987,33 +992,36 @@ async function downloadPDF() {
   overlay.classList.add('active');
   try {
     const el = document.getElementById('cmr-doc');
+
+    // Renderizar a ancho A4 real (210mm a 96dpi ≈ 794px)
+    const prevWidth = el.style.width;
+    const prevMinWidth = el.style.minWidth;
+    el.style.width = '794px';
+    el.style.minWidth = '794px';
+
     const canvas = await html2canvas(el, {
-      scale: 2.5,
+      scale: 3,
       useCORS: true,
       logging: false,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      width: 794,
+      windowWidth: 1200
     });
+
+    el.style.width = prevWidth;
+    el.style.minWidth = prevMinWidth;
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    const pW = pdf.internal.pageSize.getWidth();
-    const pH = pdf.internal.pageSize.getHeight();
+    const pW = pdf.internal.pageSize.getWidth();   // 210mm
+    const pH = pdf.internal.pageSize.getHeight();  // 297mm
     const margin = 6;
-    const maxW = pW - margin * 2;
-    const imgRatio = canvas.height / canvas.width;
-    let imgW = maxW;
-    let imgH = imgW * imgRatio;
+    const imgW = pW - margin * 2;                  // siempre ancho completo
+    const imgH = (canvas.height / canvas.width) * imgW;
+    const y = imgH < (pH - margin * 2) ? (pH - imgH) / 2 : margin;
 
-    if (imgH > pH - margin * 2) {
-      imgH = pH - margin * 2;
-      imgW = imgH / imgRatio;
-    }
-
-    const x = (pW - imgW) / 2;
-    const y = margin;
-
-    pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', x, y, imgW, imgH);
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', margin, y, imgW, imgH);
     pdf.save(buildPdfFilename() + '.pdf');
 
     showToast('PDF descargado correctamente ✓', 'ok');
@@ -1032,6 +1040,22 @@ function showToast(msg, type='') {
   t.className = 'toast show ' + type;
   setTimeout(() => { t.className = 'toast'; }, 3000);
 }
+
+// ===== ENTER KEY NAVIGATION =====
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  const tag = document.activeElement.tagName;
+  if (tag !== 'INPUT' && tag !== 'SELECT') return;
+  if (document.activeElement.tagName === 'TEXTAREA') return;
+  e.preventDefault();
+  const focusable = Array.from(
+    document.querySelectorAll('.sidebar input:not([readonly]), .sidebar select')
+  );
+  const idx = focusable.indexOf(document.activeElement);
+  if (idx === -1) return;
+  const next = focusable[idx + 1];
+  if (next) next.focus();
+});
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
