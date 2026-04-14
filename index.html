@@ -790,23 +790,10 @@ function getTransportistaTexto(inc) {
 
 function buildInstructions(map) {
   const inc = map.incoterm || 'EXW';
-  const lugar = map.carga_lugar || '[lugar de carga]';
-  const ent = [map.ent_ciudad, map.ent_pais].filter(Boolean).join(' · ') || '[destino]';
   const fac = map.doc_factura || '[nº factura]';
-  const t = {
-    EXW: `EXW ${lugar} · Incoterms 2020 · Nº factura ${fac}`,
-    FCA: `FCA ${lugar} · Incoterms 2020 · Nº factura ${fac}`,
-    CPT: `CPT ${ent} · Incoterms 2020 · Nº factura ${fac}`,
-    CIP: `CIP ${ent} · Incoterms 2020 · Nº factura ${fac}`,
-    DAP: `DAP ${ent} · Incoterms 2020 · Nº factura ${fac}`,
-    DPU: `DPU ${ent} · Incoterms 2020 · Nº factura ${fac}`,
-    DDP: `DDP ${ent} · Incoterms 2020 · Nº factura ${fac}`,
-    FAS: `FAS puerto convenido · Incoterms 2020 · Nº factura ${fac}`,
-    FOB: `FOB puerto convenido · Incoterms 2020 · Nº factura ${fac}`,
-    CFR: `CFR puerto destino · Incoterms 2020 · Nº factura ${fac}`,
-    CIF: `CIF puerto destino · Incoterms 2020 · Nº factura ${fac}`
-  };
-  return t[inc] || `Incoterms 2020 · Nº factura ${fac}`;
+  const entrega = [map.ent_almacen, map.ent_dir, map.ent_ciudad, map.ent_pais]
+    .filter(Boolean).join(', ') || '[dirección de entrega]';
+  return `Entregar en: ${entrega}\n${inc} · Incoterms 2020 · Nº factura ${fac}`;
 }
 
 function buildFiscalObs(inc) {
@@ -837,6 +824,8 @@ function syncCMR() {
   const map = {
     incoterm: inc,
     carga_lugar: v('f_carga_lugar') || DEFAULTS.carga_lugar,
+    ent_almacen: v('f_ent_almacen'),
+    ent_dir: v('f_ent_dir'),
     ent_ciudad: v('f_ent_ciudad'),
     ent_pais: v('f_ent_pais'),
     doc_factura: v('f_doc_factura')
